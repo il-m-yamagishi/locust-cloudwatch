@@ -1,0 +1,29 @@
+services:
+  web:
+    build: example/target-project
+    ports:
+      - "8080:8080"
+
+  master:
+    build: .
+    ports:
+      - "8089:8089"
+    volumes:
+      - ".:/usr/src/app:ro"
+    environment:
+      LOCUST_MODE_MASTER: true
+      LOCUST_HOST: http://web:8080
+      LOCUST_CW_METRICS: 1
+    depends_on:
+      - worker
+
+  worker:
+    build: .
+    volumes:
+      - ".:/usr/src/app:ro"
+    environment:
+      LOCUST_MODE_WORKER: true
+      LOCUST_MASTER_NODE_HOST: master
+      LOCUST_CW_METRICS: 1
+    deploy:
+      replicas: 2
